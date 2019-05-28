@@ -10,4 +10,12 @@ router.get('/', (req, res) => {
     })
 })
 
+router.get('/:id', (req, res) => {
+    const { id } = req.params
+    db.findById(id)
+    .then(post => {
+        res.json({ post })
+    })
+})
+
 module.exports = router;
