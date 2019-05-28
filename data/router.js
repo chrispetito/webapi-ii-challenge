@@ -22,11 +22,9 @@ router.get("/:id", (req, res) => {
     .then(post => {
       post.length > 0
         ? res.json({ post })
-        : res
-            .status(404)
-            .json({
-              message: "The post with the specified ID does not exist."
-            });
+        : res.status(404).json({
+            message: "The post with the specified ID does not exist."
+          });
     })
     .catch(err => {
       res
@@ -42,11 +40,9 @@ router.get("/:id/comments", (req, res) => {
     .then(comments => {
       comments.length > 0
         ? res.json({ comments })
-        : res
-            .status(404)
-            .json({
-              message: "The post with the specified ID does not exist."
-            });
+        : res.status(404).json({
+            message: "The post with the specified ID does not exist."
+          });
     })
     .catch(err => {
       res
@@ -59,16 +55,37 @@ router.get("/:id/comments", (req, res) => {
 router.post("/", (req, res) => {
   const { title, contents, created_at, updated_at } = req.body;
   db.insert({ title, contents, created_at, updated_at }).then(response => {
-    res.status(201).json(response);
+    !title || !contents
+      ? res.status(400).json({
+          errorMessage: "Please provide title and contents for the post ."
+        })
+      : res.status(201).json(response);
   });
 });
+//   .catch(err => {
+//     res
+//       .status(500)
+//       .json({
+//         error: "There was an error while saving the post to the database"
+//       });
+//   });
 
 //new comment
 router.post("/:id/comments", (req, res) => {
   const { id } = req.params;
   const { text, post_id, created_at, updated_at } = req.body;
   db.insertComment({ text, post_id, created_at, updated_at }).then(response => {
-    res.json(response);
+    if (response.length > 0) {
+      res.status(201).json(response);
+    } else if (!text) {
+      res
+        .status(400)
+        .json({ errorMessage: "Please provide text for the comment." });
+    } else {
+      res.status(404).json({
+        message: "The post with the specified ID does not exist."
+      });
+    }
   });
 });
 
@@ -83,10 +100,21 @@ router.delete("/:id", (req, res) => {
 //modify individual post
 router.put("/:id", (req, res) => {
   const { id } = req.params;
-  const { text, post_id, created_at, updated_at } = req.body;
+  const { title, contents , created_at, updated_at } = req.body;
   db.update(id, req.body).then(response => {
-    res.json(response);
+    if (response === 0) {
+      res
+        .status(404)
+        .json({ message: "The post with the specified ID does not exist." });
+    } else if (!req.body.title || !contents) {
+      res
+        .status(400)
+        .json({
+          errorMessage: "Please provide title and contents for the post."
+        });
+    } else {
+      res.status(201).json(response);
+    }
   });
 });
-
 module.exports = router;
