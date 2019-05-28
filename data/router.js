@@ -61,9 +61,6 @@ router.post("/", (req, res) => {
         })
       : res.status(201).json(response);
   });
-  db.catch(err => {
-    res.status(500).json({ message: "error" });
-  });
 });
 
 //new comment
@@ -83,21 +80,14 @@ router.post("/:id/comments", (req, res) => {
       });
     }
   });
-  db.catch(err => {
-    res.status(500).json({ error: "There was an error while saving the comment to the database"  });
-  });
 });
 
 //delete individual post
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
   db.remove(id).then(response => {
-    res.json(response);
+    res.status(201).json(response);
   });
-  db.catch(err => {
-      res.status(500).json({ error: "The post could not be removed" })
-  }
-    )
 });
 
 //modify individual post
@@ -117,8 +107,7 @@ router.put("/:id", (req, res) => {
       res.status(201).json(response);
     }
   });
-  db.catch(err => {
-    res.status(500).json({ error: "The post information could not be modified."  });
-  });
-});
+}
+);
 module.exports = router;
+
